@@ -1,0 +1,36 @@
+pipeline{
+ agent any
+ environment{
+ dockerfilePath = "/home/batoi/Documentos/practica-Jenkins-2"
+ registry = "imartosgazquez/practica-jenkins:v1"
+ registryCredential = 'Credenciales_dockerhub'
+ }
+ stages{
+ stage ('Test'){
+ steps {
+ sh 'echo executing test'
+ }
+ }
+ stage('Build image Docker'){
+ steps {
+ script{
+dockerImage = docker.build(registry, "-f $dockerfilePath/Dockerfile .")
+ }
+ }
+ }
+ stage('Push Docker'){
+ steps {
+ script{
+ docker.withRegistry('', registryCredential){
+ dockerImage.push()
+ }
+ }
+ }
+ }
+ stage('Docker Run'){
+ steps {
+ sh 'docker run -d -p 90:80 ${registry}'
+ }
+ }
+ }
+}
